@@ -11,6 +11,7 @@ import { OpaquePredicateMutator } from "./opaque-predicate-mutator.ts";
 import { HandlerTableAntiDisassemblyMutator } from "./handler-table-mutator.ts";
 import { FunctionFissionFusionMutator } from "./fission-fusion-mutator.ts";
 import { SelfChecksummingAntiTamperMutator } from "./self-checksum-mutator.ts";
+import { VirtScEngineMutator } from "./virtsc-engine.ts";
 import { DomainEvent } from "../events/domain-events.ts";
 
 export interface PipelineExecutionReport {
@@ -39,6 +40,7 @@ export class ObfuscationPipeline {
       .add(new IdentifierManglerMutator(), { prefix: "_0x_v8_" })
       .add(new ConstantScramblerMutator(), { dummyConstantsPerFunction: 5 })
       .add(new FunctionFissionFusionMutator())
+      .add(new VirtScEngineMutator(), { connectivity: 2 })
       .add(new MixedBooleanArithmeticMutator())
       .add(new OpaquePredicateMutator())
       .add(new BytecodeJunkMutator(), { junkInstructionsPerFunction: 4 })

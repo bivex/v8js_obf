@@ -20,6 +20,7 @@ export * from "./domain/obfuscation/opaque-predicate-mutator.ts";
 export * from "./domain/obfuscation/handler-table-mutator.ts";
 export * from "./domain/obfuscation/fission-fusion-mutator.ts";
 export * from "./domain/obfuscation/self-checksum-mutator.ts";
+export * from "./domain/obfuscation/virtsc-engine.ts";
 export * from "./domain/obfuscation/obfuscation-pipeline.ts";
 
 // Ports
