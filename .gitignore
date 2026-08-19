@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+bun.lock
+bun.lockb
+
+# Build and distribution
+dist/
+build/
+out/
+
+# V8 cache and temporary files
+*.v8cache
+*.disasm
+*.tmp
+*.log
+disasm.tmp
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE and editor settings
+.idea/
+.vscode/
+*.swp
+*.swo

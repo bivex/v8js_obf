@@ -1,0 +1,32 @@
+{
+  "name": "v8js-obf",
+  "version": "1.0.0",
+  "description": "Domain-Driven Design (DDD) Hexagonal Architecture application for V8 Serialized Objects & Code Cache Obfuscation in Bun & TypeScript",
+  "main": "src/index.ts",
+  "bin": {
+    "v8obf": "src/cli.ts"
+  },
+  "type": "module",
+  "scripts": {
+    "start": "bun run src/cli.ts",
+    "test": "bun test",
+    "typecheck": "tsc --noEmit",
+    "build": "bun build src/index.ts --outdir dist --target node"
+  },
+  "keywords": [
+    "v8",
+    "bytecode",
+    "code-cache",
+    "obfuscation",
+    "ddd",
+    "hexagonal-architecture",
+    "bun",
+    "typescript"
+  ],
+  "author": "Antigravity",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.0"
+  }
+}
