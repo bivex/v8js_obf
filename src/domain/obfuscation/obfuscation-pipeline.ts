@@ -9,6 +9,8 @@ import { ControlFlowMutator } from "./control-flow-mutator.ts";
 import { MixedBooleanArithmeticMutator } from "./mba-mutator.ts";
 import { OpaquePredicateMutator } from "./opaque-predicate-mutator.ts";
 import { HandlerTableAntiDisassemblyMutator } from "./handler-table-mutator.ts";
+import { FunctionFissionFusionMutator } from "./fission-fusion-mutator.ts";
+import { SelfChecksummingAntiTamperMutator } from "./self-checksum-mutator.ts";
 import { DomainEvent } from "../events/domain-events.ts";
 
 export interface PipelineExecutionReport {
@@ -36,10 +38,12 @@ export class ObfuscationPipeline {
       .add(new StringEncryptorMutator(), { encryptionMode: "xor", key: 0x7f })
       .add(new IdentifierManglerMutator(), { prefix: "_0x_v8_" })
       .add(new ConstantScramblerMutator(), { dummyConstantsPerFunction: 5 })
+      .add(new FunctionFissionFusionMutator())
       .add(new MixedBooleanArithmeticMutator())
       .add(new OpaquePredicateMutator())
       .add(new BytecodeJunkMutator(), { junkInstructionsPerFunction: 4 })
       .add(new ControlFlowMutator())
+      .add(new SelfChecksummingAntiTamperMutator())
       .add(new HandlerTableAntiDisassemblyMutator());
   }
 
