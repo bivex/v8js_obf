@@ -6,6 +6,9 @@ import { IdentifierManglerMutator } from "./identifier-mangler-mutator.ts";
 import { ConstantScramblerMutator } from "./constant-scrambler-mutator.ts";
 import { BytecodeJunkMutator } from "./bytecode-junk-mutator.ts";
 import { ControlFlowMutator } from "./control-flow-mutator.ts";
+import { MixedBooleanArithmeticMutator } from "./mba-mutator.ts";
+import { OpaquePredicateMutator } from "./opaque-predicate-mutator.ts";
+import { HandlerTableAntiDisassemblyMutator } from "./handler-table-mutator.ts";
 import { DomainEvent } from "../events/domain-events.ts";
 
 export interface PipelineExecutionReport {
@@ -33,8 +36,11 @@ export class ObfuscationPipeline {
       .add(new StringEncryptorMutator(), { encryptionMode: "xor", key: 0x7f })
       .add(new IdentifierManglerMutator(), { prefix: "_0x_v8_" })
       .add(new ConstantScramblerMutator(), { dummyConstantsPerFunction: 5 })
+      .add(new MixedBooleanArithmeticMutator())
+      .add(new OpaquePredicateMutator())
       .add(new BytecodeJunkMutator(), { junkInstructionsPerFunction: 4 })
-      .add(new ControlFlowMutator());
+      .add(new ControlFlowMutator())
+      .add(new HandlerTableAntiDisassemblyMutator());
   }
 
   public add(mutator: BaseMutator, options?: MutatorOptions): this {

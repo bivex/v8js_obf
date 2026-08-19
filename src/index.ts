@@ -15,6 +15,9 @@ export * from "./domain/obfuscation/identifier-mangler-mutator.ts";
 export * from "./domain/obfuscation/constant-scrambler-mutator.ts";
 export * from "./domain/obfuscation/bytecode-junk-mutator.ts";
 export * from "./domain/obfuscation/control-flow-mutator.ts";
+export * from "./domain/obfuscation/mba-mutator.ts";
+export * from "./domain/obfuscation/opaque-predicate-mutator.ts";
+export * from "./domain/obfuscation/handler-table-mutator.ts";
 export * from "./domain/obfuscation/obfuscation-pipeline.ts";
 
 // Ports
