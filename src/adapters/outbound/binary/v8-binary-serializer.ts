@@ -8,55 +8,47 @@ export class V8BinarySerializer implements BinaryCodecPort {
     throw new Error("Use V8BinaryParser for decoding");
   }
 
-  /**
-   * Serializes a CodeCache aggregate into a valid V8 SerializedCodeData binary buffer.
-   */
   public encode(codeCache: CodeCache): Buffer {
     let payload = codeCache.getRawPayload();
 
     if (!payload || payload.length === 0) {
-      // Synthesize binary payload from domain entities
       payload = this.synthesizePayload(codeCache);
     } else {
-      // Splicing mutated strings into existing payload
       payload = this.patchPayloadStrings(payload, codeCache);
     }
 
     codeCache.setRawPayload(payload);
-
-    // Recalculate checksum
     ChecksumService.recalculate(codeCache);
 
     const headerBuf = codeCache.getHeader().toBuffer();
     return Buffer.concat([headerBuf, payload]);
   }
 
-  /**
-   * Exports the complete CodeCache into View8 disassembly text.
-   */
   public toDisassemblyText(codeCache: CodeCache): string {
     const lines: string[] = [];
-    lines.push(`// ==========================================`);
-    lines.push(`// V8 Serialized Code Cache Disassembly`);
-    lines.push(`// Magic: 0x${codeCache.getHeader().magicNumber.toString(16)} | Checksum: 0x${codeCache.getHeader().checksum.toString(16)}`);
-    lines.push(`// ==========================================\n`);
 
     for (const sfi of codeCache.getAllFunctions()) {
       lines.push(`Start SharedFunctionInfo`);
-      lines.push(`[SharedFunctionInfo] in [BytecodeArray] ${sfi.name}: [${sfi.address || "0x1000"}]`);
+      const addr = sfi.address || "0x1000";
+      lines.push(`${addr}: [SharedFunctionInfo] in [BytecodeArray] ${sfi.name}`);
       lines.push(`Parameter count ${sfi.parameterCount}`);
       lines.push(`Register count ${sfi.registerCount}`);
       lines.push(`Constant pool (size = ${sfi.constantPool.size})`);
+      lines.push(`- length: ${sfi.constantPool.size}`);
       for (const entry of sfi.constantPool.getAll()) {
-        lines.push(`  ${entry.index}: ${entry.toDisplayString()}`);
+        const val = entry instanceof StringConstantEntry 
+          ? `<String[${entry.value.length}]: #${entry.value} >`
+          : entry.toDisplayString();
+        lines.push(`${entry.index}: ${addr} ${val}`);
       }
       lines.push(`Handler Table (size = ${sfi.handlerTable.getEntries().length})`);
       for (const h of sfi.handlerTable.getEntries()) {
-        lines.push(`  (${h.fromOffset}, ${h.toOffset}) -> ${h.handlerOffset}`);
+        lines.push(`(${h.fromOffset},${h.toOffset})  -> ${h.handlerOffset} (0x0)`);
       }
       lines.push(`Bytecode:`);
       for (const inst of sfi.instructions) {
-        lines.push(`  ${inst.toString()}`);
+        const ops = inst.operands.map(o => typeof o === "number" ? `[${o}]` : o.toString()).join(", ");
+        lines.push(`         @    ${inst.offset} : 00 00       ${inst.mnemonic} ${ops}`.trimEnd());
       }
       lines.push(`End SharedFunctionInfo\n`);
     }
@@ -77,7 +69,6 @@ export class V8BinarySerializer implements BinaryCodecPort {
       }
     }
     const combined = buffers.length > 0 ? Buffer.concat(buffers) : Buffer.alloc(64);
-    // Align to 8 bytes
     const pad = (8 - (combined.length % 8)) % 8;
     return pad > 0 ? Buffer.concat([combined, Buffer.alloc(pad)]) : combined;
   }
@@ -88,7 +79,6 @@ export class V8BinarySerializer implements BinaryCodecPort {
       for (const strEntry of sfi.constantPool.getStrings()) {
         if (strEntry.isEncrypted) {
           const searchBuf = Buffer.from(strEntry.value, "utf-8");
-          // If search pattern exists, scramble it
           const idx = result.indexOf(searchBuf);
           if (idx !== -1) {
             const encryptedBytes = Buffer.from(strEntry.value, "utf-8");
